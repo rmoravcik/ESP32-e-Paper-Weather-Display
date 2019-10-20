@@ -32,6 +32,7 @@
 //#include "lang_fr.h"                  // Localisation (French)
 //#include "lang_gr.h"                  // Localisation (German)
 //#include "lang_it.h"                  // Localisation (Italian)
+//#include "lang_cz.h"                  // Localisation (Czech)
 
 #define SCREEN_WIDTH  640             // Set for landscape mode
 #define SCREEN_HEIGHT 384
