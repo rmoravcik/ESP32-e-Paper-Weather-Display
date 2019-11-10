@@ -406,7 +406,6 @@ boolean UpdateLocalTime() {
     Serial.println("Failed to obtain time");
     return false;
   }
-  Serial.println("Time updated");
   CurrentHour = timeinfo.tm_hour;
   CurrentMin  = timeinfo.tm_min;
   CurrentSec  = timeinfo.tm_sec;
