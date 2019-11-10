@@ -1,3 +1,5 @@
+#define FONT(x) x##_te
+
 //Temperature - Humidity - Forecast
 const String TXT_FORECAST_VALUES  = "3-denní předpověd";
 const String TXT_CONDITIONS       = "Situace";
