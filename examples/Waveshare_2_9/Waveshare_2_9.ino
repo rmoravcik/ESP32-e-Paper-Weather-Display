@@ -28,11 +28,11 @@
 #include <GxEPD2_3C.h>
 #include <U8g2_for_Adafruit_GFX.h>
 #include "forecast_record.h"
-#include "lang.h"                     // Localisation (English)
+//#include "lang.h"                     // Localisation (English)
 //#include "lang_fr.h"                  // Localisation (French)
 //#include "lang_gr.h"                  // Localisation (German)
 //#include "lang_it.h"                  // Localisation (Italian)
-//#include "lang_cz.h"                  // Localisation (Czech)
+#include "lang_cz.h"                  // Localisation (Czech)
 
 #define SCREEN_WIDTH   296
 #define SCREEN_HEIGHT  128
@@ -41,9 +41,9 @@ enum alignmentType {LEFT, RIGHT, CENTER};
 
 // Connections for e.g. LOLIN D32
 static const uint8_t EPD_BUSY = 4;  // to EPD BUSY
-static const uint8_t EPD_CS   = 5;  // to EPD CS
-static const uint8_t EPD_RST  = 16; // to EPD RST
-static const uint8_t EPD_DC   = 17; // to EPD DC
+static const uint8_t EPD_CS   = 22; // to EPD CS
+static const uint8_t EPD_RST  = 26; // to EPD RST
+static const uint8_t EPD_DC   = 27; // to EPD DC
 static const uint8_t EPD_SCK  = 18; // to EPD CLK
 static const uint8_t EPD_MISO = 19; // Master-In Slave-Out not used, as no data from display
 static const uint8_t EPD_MOSI = 23; // to EPD DIN
@@ -94,8 +94,8 @@ float rain_readings[max_readings]        = {0};
 float snow_readings[max_readings]        = {0};
 
 long SleepDuration = 30; // Sleep time in minutes, aligned to the nearest minute boundary, so if 30 will always update at 00 or 30 past the hour
-int  WakeupTime    = 7;  // Don't wakeup until after 07:00 to save battery power
-int  SleepTime     = 23; // Sleep after (23+1) 00:00 to save battery power
+int  WakeupTime    = 5;  // Don't wakeup until after 07:00 to save battery power
+int  SleepTime     = 22; // Sleep after (23+1) 00:00 to save battery power
 
 //#########################################################################################
 void setup() {
@@ -402,10 +402,11 @@ boolean SetupTime() {
 boolean UpdateLocalTime() {
   struct tm timeinfo;
   char   time_output[30], day_output[30], update_time[30];
-  while (!getLocalTime(&timeinfo, 5000)) { // Wait for 5-sec for time to synchronise
+  while (!getLocalTime(&timeinfo, 15000)) { // Wait for 15-sec for time to synchronise
     Serial.println("Failed to obtain time");
     return false;
   }
+  Serial.println("Time updated");
   CurrentHour = timeinfo.tm_hour;
   CurrentMin  = timeinfo.tm_min;
   CurrentSec  = timeinfo.tm_sec;
@@ -758,7 +759,7 @@ void InitialiseDisplay() {
   display.init(115200);
   SPI.end();
   SPI.begin(EPD_SCK, EPD_MISO, EPD_MOSI, EPD_CS);
-  display.setRotation(3);                    // Use 1 or 3 for landscape modes
+  display.setRotation(1);                    // Use 1 or 3 for landscape modes
   u8g2Fonts.begin(display);                  // connect u8g2 procedures to Adafruit GFX
   u8g2Fonts.setFontMode(1);                  // use u8g2 transparent mode (this is default)
   u8g2Fonts.setFontDirection(0);             // left to right (this is default)
