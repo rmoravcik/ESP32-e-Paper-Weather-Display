@@ -86,6 +86,8 @@ Forecast_record_type  WxConditions[1];
 Forecast_record_type  WxForecast[max_readings];
 
 #include <common.h>
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
 
 float pressure_readings[max_readings]    = {0};
 float temperature_readings[max_readings] = {0};
@@ -99,10 +101,12 @@ int  SleepTime     = 22; // Sleep after (23+1) 00:00 to save battery power
 
 //#########################################################################################
 void setup() {
+  DisableBrownOutDetector();
   StartTime = millis();
   Serial.begin(115200);
-  if (StartWiFi() == WL_CONNECTED && SetupTime() == true) {
-    if ((CurrentHour >= WakeupTime && CurrentHour <= SleepTime)) {
+  delay(500); // Allow the PSU to stabilise
+  if (StartWiFi() == WL_CONNECTED) {
+    if ((SetupTime() == true) && (CurrentHour >= WakeupTime) && (CurrentHour <= SleepTime)) {
       InitialiseDisplay(); // Give screen time to initialise by getting weather data!
       byte Attempts = 1;
       bool RxWeather = false, RxForecast = false;
@@ -112,11 +116,15 @@ void setup() {
         if (RxForecast == false) RxForecast = obtain_wx_data(client, "forecast");
         Attempts++;
       }
+      StopWiFi(); // Reduces power consumption
       if (RxWeather && RxForecast) { // Only if received both Weather or Forecast proceed
-        StopWiFi(); // Reduces power consumption
         DisplayWeather();
         display.display(false); // Full screen update mode
       }
+    }
+    else
+    {
+      StopWiFi(); // Reduces power consumption
     }
   }
   BeginSleep();
@@ -127,7 +135,7 @@ void loop() { // this will never run!
 //#########################################################################################
 void BeginSleep() {
   display.powerOff();
-  long SleepTimer = (SleepDuration * 60 - ((CurrentMin % SleepDuration) * 60 + CurrentSec)); //Some ESP32 are too fast to maintain accurate time
+  long SleepTimer = (SleepDuration * 60 - ((CurrentMin % SleepDuration) * 60 + CurrentSec)) + 15; //Some ESP32 are too fast to maintain accurate time
   esp_sleep_enable_timer_wakeup(SleepTimer * 1000000LL);
 #ifdef BUILTIN_LED
   pinMode(BUILTIN_LED, INPUT); // If it's On, turn it off and some boards use GPIO-5 for SPI-SS, which remains low after screen use
@@ -137,6 +145,10 @@ void BeginSleep() {
   Serial.println("Awake for : " + String((millis() - StartTime) / 1000.0, 3) + "-secs");
   Serial.println("Starting deep-sleep period...");
   esp_deep_sleep_start();  // Sleep for e.g. 30 minutes
+}
+//#########################################################################################
+void DisableBrownOutDetector() {
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
 }
 //#########################################################################################
 void DisplayWeather() {             // 2.9" e-paper display is 296x128 resolution
@@ -173,8 +185,8 @@ void Draw_Main_Weather_Section() {
   DrawPressureTrend(3, 52, WxConditions[0].Pressure, WxConditions[0].Trend);
   u8g2Fonts.setFont(FONT(u8g2_font_helvB12));
   String Wx_Description = WxConditions[0].Forecast0;
-  if (WxConditions[0].Forecast1 != "") Wx_Description += " & " +  WxConditions[0].Forecast1;
-  if (WxConditions[0].Forecast2 != "" && WxConditions[0].Forecast1 != WxConditions[0].Forecast2) Wx_Description += " & " +  WxConditions[0].Forecast2;
+  if (WxConditions[0].Forecast1 != "") Wx_Description += ", " +  WxConditions[0].Forecast1;
+  if (WxConditions[0].Forecast2 != "" && WxConditions[0].Forecast1 != WxConditions[0].Forecast2) Wx_Description += ", " +  WxConditions[0].Forecast2;
   drawString(2, 67, TitleCase(Wx_Description), LEFT);
   display.drawLine(0, 77, 296, 77, GxEPD_BLACK);
 }
@@ -755,7 +767,7 @@ void drawStringMaxWidth(int x, int y, unsigned int text_width, String text, alig
 }
 //#########################################################################################
 void InitialiseDisplay() {
-  display.init(115200);
+  display.init(0);
   SPI.end();
   SPI.begin(EPD_SCK, EPD_MISO, EPD_MOSI, EPD_CS);
   display.setRotation(1);                    // Use 1 or 3 for landscape modes
