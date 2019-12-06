@@ -292,7 +292,7 @@ String WindDegToDirection(float winddirection) {
 }
 //#########################################################################################
 void DrawPressureAndTrend(int x, int y, float pressure, String slope) {
-  drawString(x, y, String(pressure, (Units == "M" ? 0 : 1)) + (Units == "M" ? "mb" : "in"), CENTER);
+  drawString(x, y, String(pressure, (Units == "M" ? 0 : 1)) + (Units == "M" ? "hPa" : "in"), CENTER);
   x = x + 40; y = y + 2;
   if      (slope == "+") {
     display.drawLine(x,  y, x + 4, y - 4, GxEPD_BLACK);
