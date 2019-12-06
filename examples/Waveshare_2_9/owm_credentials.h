@@ -1,9 +1,9 @@
 // Change to your WiFi credentials
-const char* ssid     = "Ruby Komtesa";
-const char* password = "Sherlock";
+const char* ssid     = "your_SSID";     // WiFi SSID to connect to
+const char* password = "your_PASSWORD"; // WiFi password needed for the SSID
 
 // Use your own API key by signing up for a free developer account at https://openweathermap.org/
-String apikey       = "95b1d2c38a122e984b4d54dafa420c33";  // See: https://openweathermap.org/
+String apikey       = "your_API_key";                      // See: https://openweathermap.org/  // It's free to get an API key, but don't take more than 60 readings/minute!
 const char server[] = "api.openweathermap.org";
 //http://api.openweathermap.org/data/2.5/forecast?q=Melksham,UK&APPID=your_OWM_API_key&mode=json&units=metric&cnt=40
 //http://api.openweathermap.org/data/2.5/weather?q=Melksham,UK&APPID=your_OWM_API_key&mode=json&units=metric&cnt=1
