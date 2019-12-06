@@ -432,7 +432,7 @@ void DisplayConditionsSection(int x, int y, String IconName, bool IconSize) {
     drawString(x - 20, y + 64, String(WxConditions[0].Humidity, 0) + "%", CENTER);
     u8g2Fonts.setFont(FONT(u8g2_font_helvB10));
     drawString(x + 28, y + 64, "RH", CENTER);
-    if (WxConditions[0].Visibility > 0) Visibility(x - 50, y - 78, String(WxConditions[0].Visibility) + "M");
+    if (WxConditions[0].Visibility > 0) Visibility(x - 50, y - 78, String(WxConditions[0].Visibility) + "m");
     if (WxConditions[0].Cloudcover > 0) CloudCover(x + 28, y - 78, WxConditions[0].Cloudcover);
   }
 }

@@ -159,7 +159,7 @@ void DisplayWeather() {             // 2.9" e-paper display is 296x128 resolutio
   Draw_3hr_Forecast(70, 102, 2);    // Second 3hr forecast box
   Draw_3hr_Forecast(120, 102, 3);   // Third  3hr forecast box
   DisplayAstronomySection(148, 64); // Astronomy section Sun rise/set and Moon phase plus icon
-  if (WxConditions[0].Visibility > 0) Visibility(110, 40, String(WxConditions[0].Visibility) + "M");
+  if (WxConditions[0].Visibility > 0) Visibility(110, 40, String(WxConditions[0].Visibility) + "m");
   if (WxConditions[0].Cloudcover > 0) CloudCover(110, 55, WxConditions[0].Cloudcover);
   DrawBattery(55, 12);
 }
@@ -179,8 +179,19 @@ void Draw_Main_Weather_Section() {
   u8g2Fonts.setFont(FONT(u8g2_font_helvB10));
   DrawWind(275, 42, WxConditions[0].Winddir, WxConditions[0].Windspeed);
   if (WxConditions[0].Rainfall > 0.005 || WxConditions[0].Snowfall > 0.005) {
-    if (WxConditions[0].Rainfall > 0.005) drawString(170, 66, String(WxConditions[0].Rainfall, 1) + (Units == "M" ? "mm " : "in ") + TXT_PRECIPITATION_SOON, LEFT);
-    else drawString(170, 66, String(WxConditions[0].Snowfall, 1) + (Units == "M" ? "mm " : "in ") + TXT_PRECIPITATION_SOON, LEFT); // Rain has precedence over snow if both reported!
+    if (WxConditions[0].Rainfall > 0.005) {
+      if (Language == "CZ") {
+        drawString(170, 66, TXT_PRECIPITATION_SOON + " " + String(WxConditions[0].Rainfall, 1) + (Units == "M" ? "mm" : "in"), LEFT);
+      } else {
+        drawString(170, 66, String(WxConditions[0].Rainfall, 1) + (Units == "M" ? "mm " : "in ") + TXT_PRECIPITATION_SOON, LEFT);
+      }
+    } else {
+      if (Language == "CZ") {
+        drawString(170, 66, TXT_PRECIPITATION_SOON + " " + String(WxConditions[0].Snowfall, 1) + (Units == "M" ? "mm" : "in"), LEFT); // Rain has precedence over snow if both reported!
+      } else {
+        drawString(170, 66, String(WxConditions[0].Snowfall, 1) + (Units == "M" ? "mm " : "in ") + TXT_PRECIPITATION_SOON, LEFT); // Rain has precedence over snow if both reported!
+      }
+    }
   }
   DrawPressureTrend(3, 52, WxConditions[0].Pressure, WxConditions[0].Trend);
   u8g2Fonts.setFont(FONT(u8g2_font_helvB12));

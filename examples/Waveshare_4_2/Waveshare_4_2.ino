@@ -28,11 +28,11 @@
 #include <U8g2_for_Adafruit_GFX.h>
 #include "epaper_fonts.h"
 #include "forecast_record.h"
-#include "lang.h"
+//#include "lang.h"                     // Localisation (English)
 //#include "lang_fr.h"                  // Localisation (French)
 //#include "lang_gr.h"                  // Localisation (German)
 //#include "lang_it.h"                  // Localisation (Italian)
-//#include "lang_cz.h"                  // Localisation (Czech)
+#include "lang_cz.h"                  // Localisation (Czech)
 
 #define SCREEN_WIDTH  400.0    // Set for landscape mode, don't remove the decimal place!
 #define SCREEN_HEIGHT 300.0
@@ -40,22 +40,22 @@
 enum alignment {LEFT, RIGHT, CENTER};
 
 // Connections for e.g. LOLIN D32
-static const uint8_t EPD_BUSY = 4;  // to EPD BUSY
-static const uint8_t EPD_CS   = 5;  // to EPD CS
-static const uint8_t EPD_RST  = 16; // to EPD RST
-static const uint8_t EPD_DC   = 17; // to EPD DC
-static const uint8_t EPD_SCK  = 18; // to EPD CLK
-static const uint8_t EPD_MISO = 19; // Master-In Slave-Out not used, as no data from display
-static const uint8_t EPD_MOSI = 23; // to EPD DIN
+//static const uint8_t EPD_BUSY = 4;  // to EPD BUSY
+//static const uint8_t EPD_CS   = 5; // to EPD CS
+//static const uint8_t EPD_RST  = 16; // to EPD RST
+//static const uint8_t EPD_DC   = 17; // to EPD DC
+//static const uint8_t EPD_SCK  = 18; // to EPD CLK
+//static const uint8_t EPD_MISO = 19; // Master-In Slave-Out not used, as no data from display
+//static const uint8_t EPD_MOSI = 23; // to EPD DIN
 
 // Connections for e.g. Waveshare ESP32 e-Paper Driver Board
-//static const uint8_t EPD_BUSY = 25;
-//static const uint8_t EPD_CS   = 15;
-//static const uint8_t EPD_RST  = 26; 
-//static const uint8_t EPD_DC   = 27; 
-//static const uint8_t EPD_SCK  = 13;
-//static const uint8_t EPD_MISO = 12; // Master-In Slave-Out not used, as no data from display
-//static const uint8_t EPD_MOSI = 14;
+static const uint8_t EPD_BUSY = 25;
+static const uint8_t EPD_CS   = 15;
+static const uint8_t EPD_RST  = 26; 
+static const uint8_t EPD_DC   = 27; 
+static const uint8_t EPD_SCK  = 13;
+static const uint8_t EPD_MISO = 12; // Master-In Slave-Out not used, as no data from display
+static const uint8_t EPD_MOSI = 14;
 
 GxEPD2_BW<GxEPD2_420, GxEPD2_420::HEIGHT> display(GxEPD2_420(/*CS=D8*/ EPD_CS, /*DC=D3*/ EPD_DC, /*RST=D4*/ EPD_RST, /*BUSY=D2*/ EPD_BUSY));
 
@@ -88,6 +88,8 @@ Forecast_record_type  WxConditions[1];
 Forecast_record_type  WxForecast[max_readings];
 
 #include <common.h>
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
 
 #define autoscale_on  true
 #define autoscale_off false
@@ -101,15 +103,17 @@ float rain_readings[max_readings]        = {0};
 float snow_readings[max_readings]        = {0};
 
 long SleepDuration = 30; // Sleep time in minutes, aligned to the nearest minute boundary, so if 30 will always update at 00 or 30 past the hour
-int  WakeupTime    = 7;  // Don't wakeup until after 07:00 to save battery power
-int  SleepTime     = 23; // Sleep after (23+1) 00:00 to save battery power
+int  WakeupTime    = 5;  // Don't wakeup until after 07:00 to save battery power
+int  SleepTime     = 22; // Sleep after (23+1) 00:00 to save battery power
 
 //#########################################################################################
 void setup() {
+  DisableBrownOutDetector();
   StartTime = millis();
   Serial.begin(115200);
-  if (StartWiFi() == WL_CONNECTED && SetupTime() == true) {
-    if (CurrentHour >= WakeupTime && CurrentHour <= SleepTime ) {
+  delay(500); // Allow the PSU to stabilise
+  if (StartWiFi() == WL_CONNECTED) {
+    if ((SetupTime() == true) && (CurrentHour >= WakeupTime) && (CurrentHour <= SleepTime)) {
       InitialiseDisplay(); // Give screen time to initialise by getting weather data!
       byte Attempts = 1;
       bool RxWeather = false, RxForecast = false;
@@ -119,11 +123,15 @@ void setup() {
         if (RxForecast == false) RxForecast = obtain_wx_data(client, "forecast");
         Attempts++;
       }
+      StopWiFi(); // Reduces power consumption
       if (RxWeather && RxForecast) { // Only if received both Weather or Forecast proceed
-        StopWiFi(); // Reduces power consumption
         DisplayWeather();
         display.display(false); // Full screen update mode
       }
+    }
+    else
+    {
+      StopWiFi(); // Reduces power consumption
     }
   }
   BeginSleep();
@@ -134,7 +142,7 @@ void loop() { // this will never run!
 //#########################################################################################
 void BeginSleep() {
   display.powerOff();
-  long SleepTimer = (SleepDuration * 60 - ((CurrentMin % SleepDuration) * 60 + CurrentSec)); //Some ESP32 are too fast to maintain accurate time
+  long SleepTimer = (SleepDuration * 60 - ((CurrentMin % SleepDuration) * 60 + CurrentSec)) + 15; //Some ESP32 are too fast to maintain accurate time
   esp_sleep_enable_timer_wakeup(SleepTimer * 1000000LL);
 #ifdef BUILTIN_LED
   pinMode(BUILTIN_LED, INPUT); // If it's On, turn it off and some boards use GPIO-5 for SPI-SS, which remains low after screen use
@@ -146,12 +154,16 @@ void BeginSleep() {
   esp_deep_sleep_start();      // Sleep for e.g. 30 minutes
 }
 //#########################################################################################
+void DisableBrownOutDetector() {
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
+}
+//#########################################################################################
 void DisplayWeather() {                 // 4.2" e-paper display is 400x300 resolution
   DrawHeadingSection();                 // Top line of the display
   DrawMainWeatherSection(172, 70);      // Centre section of display for Location, temperature, Weather report, current Wx Symbol and wind direction
   DrawForecastSection(233, 15);         // 3hr forecast boxes
   DisplayPrecipitationSection(233, 82); // Precipitation sectio
-  if (WxConditions[0].Visibility > 0) Visibility(335, 100, String(WxConditions[0].Visibility) + "M");
+  if (WxConditions[0].Visibility > 0) Visibility(335, 100, String(WxConditions[0].Visibility) + "m");
   if (WxConditions[0].Cloudcover > 0) CloudCover(350, 125, WxConditions[0].Cloudcover);
   DrawAstronomySection(233, 74);        // Astronomy section Sun rise/set, Moon phase and Moon icon
 }
@@ -185,7 +197,7 @@ void DrawForecastSection(int x, int y) {
   DrawForecastWeather(x + 56, y, 1);
   DrawForecastWeather(x + 112, y, 2);
   //       (x,y,width,height,MinValue, MaxValue, Title, Data Array, AutoScale, ChartMode)
-  for (int r = 1; r <= max_readings; r++) {
+  for (int r = 1; r < max_readings; r++) {
     if (Units == "I") {
       pressure_readings[r] = WxForecast[r].Pressure * 0.02953;
       rain_readings[r]     = WxForecast[r].Rainfall * 0.0393701;
@@ -198,11 +210,13 @@ void DrawForecastSection(int x, int y) {
   }
   display.drawLine(0, y + 172, SCREEN_WIDTH, y + 172, GxEPD_BLACK);
   u8g2Fonts.setFont(FONT(u8g2_font_helvB12));
-  drawString(SCREEN_WIDTH / 2, y + 180, "3-Day Forecast Values", CENTER);
+  drawString(SCREEN_WIDTH / 2, y + 180, TXT_FORECAST_VALUES, CENTER);
   u8g2Fonts.setFont(FONT(u8g2_font_helvB10));
-  DrawGraph(SCREEN_WIDTH / 400 * 30,  SCREEN_HEIGHT / 300 * 221, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 5, 900, 1050, "Pressure", pressure_readings, max_readings, autoscale_on, barchart_off);
-  DrawGraph(SCREEN_WIDTH / 400 * 158, SCREEN_HEIGHT / 300 * 221, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 5, 10, 30, "Temperature", temperature_readings, max_readings, autoscale_on, barchart_off);
-  DrawGraph(SCREEN_WIDTH / 400 * 288, SCREEN_HEIGHT / 300 * 221, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 5, 0, 30, "Rainfall", rain_readings, max_readings, autoscale_on, barchart_on);
+  DrawGraph(SCREEN_WIDTH / 400 * 30,  SCREEN_HEIGHT / 300 * 221, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 5, 900, 1050, Units == "M" ? TXT_PRESSURE_HPA : TXT_PRESSURE_IN, pressure_readings, max_readings, autoscale_on, barchart_off);
+  DrawGraph(SCREEN_WIDTH / 400 * 158, SCREEN_HEIGHT / 300 * 221, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 5, 10, 30, Units == "M" ? TXT_TEMPERATURE_C : TXT_TEMPERATURE_F, temperature_readings, max_readings, autoscale_on, barchart_off);
+  if (SumOfPrecip(rain_readings, max_readings) >= SumOfPrecip(snow_readings, max_readings))
+    DrawGraph(SCREEN_WIDTH / 400 * 288, SCREEN_HEIGHT / 300 * 221, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 5, 0, 30, Units == "M" ? TXT_RAINFALL_MM : TXT_RAINFALL_IN, rain_readings, max_readings, autoscale_on, barchart_on);
+  else DrawGraph(SCREEN_WIDTH / 400 * 288, SCREEN_HEIGHT / 300 * 221, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 5, 0, 30, Units == "M" ? TXT_SNOWFALL_MM : TXT_SNOWFALL_IN, rain_readings, max_readings, autoscale_on, barchart_on);
 }
 //#########################################################################################
 void DrawForecastWeather(int x, int y, int index) {
@@ -888,7 +902,7 @@ void drawStringMaxWidth(int x, int y, unsigned int text_width, String text, alig
 }
 //#########################################################################################
 void InitialiseDisplay() {
-  display.init(115200);
+  display.init(0);
   SPI.end();
   SPI.begin(EPD_SCK, EPD_MISO, EPD_MOSI, EPD_CS);
   u8g2Fonts.begin(display); // connect u8g2 procedures to Adafruit GFX
