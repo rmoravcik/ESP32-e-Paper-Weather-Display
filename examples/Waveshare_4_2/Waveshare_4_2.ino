@@ -33,6 +33,7 @@
 //#include "lang_gr.h"                  // Localisation (German)
 //#include "lang_it.h"                  // Localisation (Italian)
 #include "lang_cz.h"                  // Localisation (Czech)
+//#include "lang_pl.h"                  // Localisation (Polish)
 
 #define SCREEN_WIDTH  400.0    // Set for landscape mode, don't remove the decimal place!
 #define SCREEN_HEIGHT 300.0
@@ -70,7 +71,7 @@ U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;  // Select u8g2 font from here: https://github.
 // u8g2_font_helvB24_tf
 
 //################  VERSION  ##########################
-String version = "12.1";       // Version of this program
+String version = "12.2";     // Version of this program
 //################ VARIABLES ###########################
 
 boolean LargeIcon = true, SmallIcon = false;
@@ -486,7 +487,7 @@ boolean UpdateLocalTime() {
   //See http://www.cplusplus.com/reference/ctime/strftime/
   //Serial.println(&timeinfo, "%a %b %d %Y   %H:%M:%S"); // Displays: Saturday, June 24 2017 14:05:49
   if (Units == "M") {
-    if ((Language == "CZ") || (Language == "DE")) {
+    if ((Language == "CZ") || (Language == "DE") || (Language == "PL")) {
       sprintf(day_output, "%s, %02u. %s %04u", weekday_D[timeinfo.tm_wday], timeinfo.tm_mday, month_M[timeinfo.tm_mon], (timeinfo.tm_year) + 1900); // day_output >> So., 23. Juni 2019 <<
     }
     else
@@ -922,5 +923,8 @@ void InitialiseDisplay() {
   4.  Correct sunrise/sunset time when in imperial mode.
 
   Version 12.1 Clarified Waveshare ESP32 driver board connections
+
+  Version 12.2 Changed GxEPD2 initialisation from 115200 to 0
+  1.  display.init(115200); becomes display.init(0); to stop blank screen following update to GxEPD2
 
 */

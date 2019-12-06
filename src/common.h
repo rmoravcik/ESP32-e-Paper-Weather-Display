@@ -38,8 +38,8 @@ bool DecodeWeather(WiFiClient& json, String Type) {
     WxConditions[0].lat         = root["coord"]["lat"].as<float>();              Serial.println(" Lat: "+String(WxConditions[0].lat));
     WxConditions[0].Main0       = root["weather"][0]["main"].as<char*>();        Serial.println("Main: "+String(WxConditions[0].Main0));
     WxConditions[0].Forecast0   = root["weather"][0]["description"].as<char*>(); Serial.println("For0: "+String(WxConditions[0].Forecast0));
-    WxConditions[0].Forecast1   = root["weather"][1]["main"].as<char*>();        Serial.println("For1: "+String(WxConditions[0].Forecast1));
-    WxConditions[0].Forecast2   = root["weather"][2]["main"].as<char*>();        Serial.println("For2: "+String(WxConditions[0].Forecast2));
+    WxConditions[0].Forecast1   = root["weather"][1]["description"].as<char*>(); Serial.println("For1: "+String(WxConditions[0].Forecast1));
+    WxConditions[0].Forecast2   = root["weather"][2]["description"].as<char*>(); Serial.println("For2: "+String(WxConditions[0].Forecast2));
     WxConditions[0].Icon        = root["weather"][0]["icon"].as<char*>();        Serial.println("Icon: "+String(WxConditions[0].Icon));
     WxConditions[0].Temperature = root["main"]["temp"].as<float>();              Serial.println("Temp: "+String(WxConditions[0].Temperature));
     WxConditions[0].Pressure    = root["main"]["pressure"].as<float>();          Serial.println("Pres: "+String(WxConditions[0].Pressure));

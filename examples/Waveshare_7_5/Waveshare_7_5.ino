@@ -33,6 +33,7 @@
 //#include "lang_gr.h"                  // Localisation (German)
 //#include "lang_it.h"                  // Localisation (Italian)
 //#include "lang_cz.h"                  // Localisation (Czech)
+//#include "lang_pl.h"                  // Localisation (Polish)
 
 #define SCREEN_WIDTH  640             // Set for landscape mode
 #define SCREEN_HEIGHT 384
@@ -71,7 +72,7 @@ U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;  // Select u8g2 font from here: https://github.
 // u8g2_font_helvB24_tf
 
 //################  VERSION  ###########################################
-String version = "16.5";     // Programme version, see change log at end
+String version = "16.7;     // Programme version, see change log at end
 //################ VARIABLES ###########################################
 
 boolean LargeIcon = true, SmallIcon = false;
@@ -168,7 +169,7 @@ void DisplayGeneralInfoSection() {
 }
 //#########################################################################################
 void DisplayMainWeatherSection(int x, int y) {
-  //  display.drawRect(x-67,  y-65, 140, 182, GxEPD_BLACK);
+  //  display.drawRect(x-67, y-65, 140, 182, GxEPD_BLACK);
   display.drawLine(0, 30, SCREEN_WIDTH - 3, 30,  GxEPD_BLACK);
   DisplayConditionsSection(x + 2, y + 40, WxConditions[0].Icon, LargeIcon);
   DisplayTemperatureSection(x + 125, y - 64, 110, 80);
@@ -536,7 +537,7 @@ boolean UpdateLocalTime() {
   //See http://www.cplusplus.com/reference/ctime/strftime/
   //Serial.println(&timeinfo, "%a %b %d %Y   %H:%M:%S");      // Displays: Saturday, June 24 2017 14:05:49
   if (Units == "M") {
-    if ((Language == "CZ") || (Language == "DE")) {
+    if ((Language == "CZ") || (Language == "DE") || (Language == "PL")) {
       sprintf(day_output, "%s, %02u. %s %04u", weekday_D[timeinfo.tm_wday], timeinfo.tm_mday, month_M[timeinfo.tm_mon], (timeinfo.tm_year) + 1900); // day_output >> So., 23. Juni 2019 <<
     }
     else
@@ -947,7 +948,7 @@ void drawStringMaxWidth(int x, int y, unsigned int text_width, String text, alig
 }
 //#########################################################################################
 void InitialiseDisplay() {
-  display.init(115200);
+  display.init(0);
   SPI.end();
   SPI.begin(EPD_SCK, EPD_MISO, EPD_MOSI, EPD_CS);
   u8g2Fonts.begin(display); // connect u8g2 procedures to Adafruit GFX
@@ -1018,8 +1019,12 @@ void InitialiseDisplay() {
    3.  Added a lowercase conversion of hemisphere to allow for 'North' or 'NORTH' or 'nOrth' entries for hemisphere
    4.  Adjusted graph y-axis alignment, redcued number of x dashes
 
-  Version 16.5 Clarified connections for Waveshare ESp32 driver board
+  Version 16.5 Clarified connections for Waveshare ESP32 driver board
    1.  Added SPI.end(); and SPI.begin(CLK, MISO, MOSI, CS); to enable explicit definition of pins to be used.
 
+  Version 16.6 changed GxEPD2 initialisation from 115200 to 0
+   1.  Display.init(115200); becomes display.init(0); to stop blank screen following update to GxEPD2
    
+  Version 16.7 changed u8g2 fonts selection
+   1.  Omitted 'FONT(' and added _tf to font names either Regular (R) or Bold (B)
 */
