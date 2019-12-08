@@ -30,9 +30,9 @@ const String TXT_SUNSET   = "Západ slunce";
 
 //Moon
 const String TXT_MOON_NEW             = "Nov";
-const String TXT_MOON_WAXING_CRESCENT = "Dorůst. srpek";
+const String TXT_MOON_WAXING_CRESCENT = "Dorůstající srpek";
 const String TXT_MOON_FIRST_QUARTER   = "První čtvrt";
-const String TXT_MOON_WAXING_GIBBOUS  = "Dorůst. měsíc";
+const String TXT_MOON_WAXING_GIBBOUS  = "Dorůstající měsíc";
 const String TXT_MOON_FULL            = "Úplněk";
 const String TXT_MOON_WANING_GIBBOUS  = "Couvající měsíc";
 const String TXT_MOON_THIRD_QUARTER   = "Poslední čtvrt";
