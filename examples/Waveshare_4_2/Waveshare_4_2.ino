@@ -187,7 +187,7 @@ void DrawMainWeatherSection(int x, int y) {
   String Wx_Description = WxConditions[0].Forecast0;
   if (WxConditions[0].Forecast1 != "") Wx_Description += " & " +  WxConditions[0].Forecast1;
   if (WxConditions[0].Forecast2 != "" && WxConditions[0].Forecast1 != WxConditions[0].Forecast2) Wx_Description += " & " +  WxConditions[0].Forecast2;
-  drawStringMaxWidth(x - 170, y + 83, 28, TitleCase(Wx_Description), LEFT);
+  drawStringMaxWidth(x - 170, y + 97, 28, TitleCase(Wx_Description), LEFT);
   DrawMainWx(x, y + 60);
   display.drawRect(0, y + 68, 232, 48, GxEPD_BLACK);
 }
@@ -906,6 +906,7 @@ void InitialiseDisplay() {
   display.init(0);
   SPI.end();
   SPI.begin(EPD_SCK, EPD_MISO, EPD_MOSI, EPD_CS);
+  display.setRotation(2);   // Use 1 or 3 for landscape modes
   u8g2Fonts.begin(display); // connect u8g2 procedures to Adafruit GFX
   u8g2Fonts.setFontMode(1);                  // use u8g2 transparent mode (this is default)
   u8g2Fonts.setFontDirection(0);             // left to right (this is default)
