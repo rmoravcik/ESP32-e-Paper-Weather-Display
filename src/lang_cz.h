@@ -5,13 +5,13 @@ const String TXT_FORECAST_VALUES  = "3-denní předpověd";
 const String TXT_CONDITIONS       = "Situace";
 const String TXT_DAYS             = "(Dny)";
 const String TXT_TEMPERATURES     = "Teplota";
-const String TXT_TEMPERATURE_C    = "Teplota (*C)";
-const String TXT_TEMPERATURE_F    = "Teplota (*F)";
+const String TXT_TEMPERATURE_C    = "Teplota (°C)";
+const String TXT_TEMPERATURE_F    = "Teplota (°F)";
 const String TXT_HUMIDITY_PERCENT = "Vlhkost (%)";
 
 // Pressure
 const String TXT_PRESSURE         = "Tlak";
-const String TXT_PRESSURE_HPA     = "Tlak (hpa)";
+const String TXT_PRESSURE_HPA     = "Tlak (hPa)";
 const String TXT_PRESSURE_IN      = "Tlak (in)";
 const String TXT_PRESSURE_STEADY  = "Konstantní";
 const String TXT_PRESSURE_RISING  = "Stoupající";
