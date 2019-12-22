@@ -185,8 +185,8 @@ void DrawMainWeatherSection(int x, int y) {
   DrawPressureAndTrend(x - 120, y + 58, WxConditions[0].Pressure, WxConditions[0].Trend);
   u8g2Fonts.setFont(FONT(u8g2_font_helvB12));
   String Wx_Description = WxConditions[0].Forecast0;
-  if (WxConditions[0].Forecast1 != "") Wx_Description += " & " +  WxConditions[0].Forecast1;
-  if (WxConditions[0].Forecast2 != "" && WxConditions[0].Forecast1 != WxConditions[0].Forecast2) Wx_Description += " & " +  WxConditions[0].Forecast2;
+  if (WxConditions[0].Forecast1 != "") Wx_Description += ", " +  WxConditions[0].Forecast1;
+  if (WxConditions[0].Forecast2 != "" && WxConditions[0].Forecast1 != WxConditions[0].Forecast2) Wx_Description += ", " +  WxConditions[0].Forecast2;
   drawStringMaxWidth(x - 170, y + 97, 28, TitleCase(Wx_Description), LEFT);
   DrawMainWx(x, y + 60);
   display.drawRect(0, y + 68, 232, 48, GxEPD_BLACK);
@@ -312,12 +312,12 @@ void DrawPressureAndTrend(int x, int y, float pressure, String slope) {
 void DisplayPrecipitationSection(int x, int y) {
   display.drawRect(x, y - 1, 167, 56, GxEPD_BLACK); // precipitation outline
   u8g2Fonts.setFont(FONT(u8g2_font_helvB10));
-  if (WxForecast[1].Rainfall > 0.005) { // Ignore small amounts
-    drawString(x + 5, y + 15, String(WxForecast[1].Rainfall, 2) + (Units == "M" ? "mm" : "in"), LEFT); // Only display rainfall total today if > 0
+  if (WxConditions[0].Rainfall > 0.005) { // Ignore small amounts
+    drawString(x + 5, y + 15, String(WxConditions[0].Rainfall, 2) + (Units == "M" ? "mm" : "in"), LEFT); // Only display rainfall total today if > 0
     addraindrop(x + 65 - (Units == "I" ? 10 : 0), y + 16, 7);
   }
-  if (WxForecast[1].Snowfall > 0.005)  // Ignore small amounts
-    drawString(x + 5, y + 35, String(WxForecast[1].Snowfall, 2) + (Units == "M" ? "mm" : "in") + " * *", LEFT); // Only display snowfall total today if > 0
+  if (WxConditions[0].Snowfall > 0.005)  // Ignore small amounts
+    drawString(x + 5, y + 35, String(WxConditions[0].Snowfall, 2) + (Units == "M" ? "mm" : "in") + " * *", LEFT); // Only display snowfall total today if > 0
 }
 //#########################################################################################
 void DrawAstronomySection(int x, int y) {
