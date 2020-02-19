@@ -172,9 +172,9 @@ void DisplayWeather() {                 // 4.2" e-paper display is 400x300 resol
 void DrawHeadingSection() {
   u8g2Fonts.setFont(FONT(u8g2_font_helvB08));
   drawString(SCREEN_WIDTH / 2, 0, City, CENTER);
-  drawString(SCREEN_WIDTH, 0, date_str, RIGHT);
-  drawString(4, 0, time_str, LEFT);
-  DrawBattery(65, 12);
+  drawString(4, 0, date_str + ", " + time_str, LEFT);
+  DrawRSSI(312, 12, wifi_signal);
+  DrawBattery(331, 12);
   display.drawLine(0, 12, SCREEN_WIDTH, 12, GxEPD_BLACK);
 }
 //#########################################################################################
@@ -182,13 +182,13 @@ void DrawMainWeatherSection(int x, int y) {
   DisplayDisplayWindSection(x - 115, y - 3, WxConditions[0].Winddir, WxConditions[0].Windspeed, 40);
   DisplayWXicon(x + 5, y - 5, WxConditions[0].Icon, LargeIcon);
   u8g2Fonts.setFont(FONT(u8g2_font_helvB10));
-  DrawPressureAndTrend(x - 120, y + 58, WxConditions[0].Pressure, WxConditions[0].Trend);
+  DrawPressureAndTrend(x - 115, y + 58, WxConditions[0].Pressure, WxConditions[0].Trend);
   u8g2Fonts.setFont(FONT(u8g2_font_helvB12));
   String Wx_Description = WxConditions[0].Forecast0;
   if (WxConditions[0].Forecast1 != "") Wx_Description += ", " +  WxConditions[0].Forecast1;
   if (WxConditions[0].Forecast2 != "" && WxConditions[0].Forecast1 != WxConditions[0].Forecast2) Wx_Description += ", " +  WxConditions[0].Forecast2;
-  drawStringMaxWidth(x - 170, y + 97, 28, TitleCase(Wx_Description), LEFT);
-  DrawMainWx(x, y + 60);
+  drawStringMaxWidth(x - 168, y + 97, 28, TitleCase(Wx_Description), LEFT);
+  DrawMainWx(x, y + 50);
   display.drawRect(0, y + 68, 232, 48, GxEPD_BLACK);
 }
 //#########################################################################################
@@ -211,7 +211,7 @@ void DrawForecastSection(int x, int y) {
   }
   display.drawLine(0, y + 172, SCREEN_WIDTH, y + 172, GxEPD_BLACK);
   u8g2Fonts.setFont(FONT(u8g2_font_helvB12));
-  drawString(SCREEN_WIDTH / 2, y + 180, TXT_FORECAST_VALUES, CENTER);
+  drawString(SCREEN_WIDTH / 2, y + 173, TXT_FORECAST_VALUES, CENTER);
   u8g2Fonts.setFont(FONT(u8g2_font_helvB10));
   DrawGraph(SCREEN_WIDTH / 400 * 30,  SCREEN_HEIGHT / 300 * 221, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 5, 900, 1050, Units == "M" ? TXT_PRESSURE_HPA : TXT_PRESSURE_IN, pressure_readings, max_readings, autoscale_on, barchart_off);
   DrawGraph(SCREEN_WIDTH / 400 * 158, SCREEN_HEIGHT / 300 * 221, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 5, 10, 30, Units == "M" ? TXT_TEMPERATURE_C : TXT_TEMPERATURE_F, temperature_readings, max_readings, autoscale_on, barchart_off);
@@ -225,16 +225,16 @@ void DrawForecastWeather(int x, int y, int index) {
   display.drawRect(x, y, 55, 65, GxEPD_BLACK);
   display.drawLine(x + 1, y + 13, x + 54, y + 13, GxEPD_BLACK);
   DisplayWXicon(x + 28, y + 35, WxForecast[index].Icon, SmallIcon);
-  drawString(x + 31, y + 3, String(WxForecast[index].Period.substring(11, 16)), CENTER);
-  drawString(x + 41, y + 52, String(WxForecast[index].High, 0) + "° / " + String(WxForecast[index].Low, 0) + "°", CENTER);
+  drawString(x + 28, y + 1, String(WxForecast[index].Period.substring(11, 16)), CENTER);
+  drawString(x + 28, y + 50, String(WxForecast[index].High, 0) + "° / " + String(WxForecast[index].Low, 0) + "°", CENTER);
 }
 //#########################################################################################
 void DrawMainWx(int x, int y) {
   u8g2Fonts.setFont(FONT(u8g2_font_helvB14));
   drawString(x - 25, y - 22, String(WxConditions[0].Temperature, 1) + "°" + (Units == "M" ? "C" : "F"), CENTER); // Show current Temperature
   u8g2Fonts.setFont(FONT(u8g2_font_helvB12));
-  drawString(x - 15, y - 3, String(WxConditions[0].High, 0) + "° | " + String(WxConditions[0].Low, 0) + "°", CENTER); // Show forecast high and Low
-  drawString(x + 30, y - 22, String(WxConditions[0].Humidity, 0) + "%", CENTER);
+  drawString(x - 25, y - 3, String(WxConditions[0].High, 0) + "° | " + String(WxConditions[0].Low, 0) + "°", CENTER); // Show forecast high and Low
+  drawString(x + 32, y - 22, String(WxConditions[0].Humidity, 0) + "%", CENTER);
   u8g2Fonts.setFont(FONT(u8g2_font_helvB10));
   drawString(x + 32, y - 3, "RH", CENTER);
 }
@@ -250,10 +250,10 @@ void DisplayDisplayWindSection(int x, int y, float angle, float windspeed, int C
   for (float a = 0; a < 360; a = a + 22.5) {
     dxo = Cradius * cos((a - 90) * PI / 180);
     dyo = Cradius * sin((a - 90) * PI / 180);
-    if (a == 45)  drawString(dxo + x + 10, dyo + y - 10, TXT_NE, CENTER);
-    if (a == 135) drawString(dxo + x + 7,  dyo + y + 5,  TXT_SE, CENTER);
-    if (a == 225) drawString(dxo + x - 15, dyo + y,      TXT_SW, CENTER);
-    if (a == 315) drawString(dxo + x - 15, dyo + y - 10, TXT_NW, CENTER);
+    if (a == 45)  drawString(dxo + x + 10, dyo + y - 12, TXT_NE, CENTER);
+    if (a == 135) drawString(dxo + x +  7, dyo + y + 2,  TXT_SE, CENTER);
+    if (a == 225) drawString(dxo + x -  9, dyo + y + 2,  TXT_SW, CENTER);
+    if (a == 315) drawString(dxo + x - 10, dyo + y - 12, TXT_NW, CENTER);
     dxi = dxo * 0.9;
     dyi = dyo * 0.9;
     display.drawLine(dxo + x, dyo + y, dxi + x, dyi + y, GxEPD_BLACK);
@@ -263,13 +263,13 @@ void DisplayDisplayWindSection(int x, int y, float angle, float windspeed, int C
     dyi = dyo * 0.9;
     display.drawLine(dxo + x, dyo + y, dxi + x, dyi + y, GxEPD_BLACK);
   }
-  drawString(x, y - Cradius - 10,     TXT_N, CENTER);
-  drawString(x, y + Cradius + 5,      TXT_S, CENTER);
-  drawString(x - Cradius - 10, y - 3, TXT_W, CENTER);
-  drawString(x + Cradius + 8,  y - 3, TXT_E, CENTER);
-  drawString(x - 2, y - 20, WindDegToDirection(angle), CENTER);
-  drawString(x + 3, y + 12, String(angle, 0) + "°", CENTER);
-  drawString(x + 3, y - 3, String(windspeed, 1) + (Units == "M" ? "m/s" : "mph"), CENTER);
+  drawString(x, y - Cradius - 13,     TXT_N, CENTER);
+  drawString(x, y + Cradius + 2,      TXT_S, CENTER);
+  drawString(x - Cradius - 8, y - 5, TXT_W, CENTER);
+  drawString(x + Cradius + 8,  y - 5, TXT_E, CENTER);
+  drawString(x, y - 20, WindDegToDirection(angle), CENTER);
+  drawString(x, y + 9, String(angle, 0) + "°", CENTER);
+  drawString(x, y - 6, String(windspeed, 1) + (Units == "M" ? "m/s" : "mph"), CENTER);
 }
 //#########################################################################################
 String WindDegToDirection(float winddirection) {
@@ -293,7 +293,7 @@ String WindDegToDirection(float winddirection) {
 }
 //#########################################################################################
 void DrawPressureAndTrend(int x, int y, float pressure, String slope) {
-  drawString(x, y, String(pressure, (Units == "M" ? 0 : 1)) + (Units == "M" ? "hPa" : "in"), CENTER);
+  drawString(x, y - 8, String(pressure, (Units == "M" ? 0 : 1)) + (Units == "M" ? "hPa" : "in"), CENTER);
   x = x + 40; y = y + 2;
   if      (slope == "+") {
     display.drawLine(x,  y, x + 4, y - 4, GxEPD_BLACK);
@@ -313,24 +313,24 @@ void DisplayPrecipitationSection(int x, int y) {
   display.drawRect(x, y - 1, 167, 56, GxEPD_BLACK); // precipitation outline
   u8g2Fonts.setFont(FONT(u8g2_font_helvB10));
   if (WxConditions[0].Rainfall > 0.005) { // Ignore small amounts
-    drawString(x + 5, y + 15, String(WxConditions[0].Rainfall, 2) + (Units == "M" ? "mm" : "in"), LEFT); // Only display rainfall total today if > 0
+    drawString(x + 5, y + 6, String(WxConditions[0].Rainfall, 2) + (Units == "M" ? "mm" : "in"), LEFT); // Only display rainfall total today if > 0
     addraindrop(x + 65 - (Units == "I" ? 10 : 0), y + 16, 7);
   }
   if (WxConditions[0].Snowfall > 0.005)  // Ignore small amounts
-    drawString(x + 5, y + 35, String(WxConditions[0].Snowfall, 2) + (Units == "M" ? "mm" : "in") + " * *", LEFT); // Only display snowfall total today if > 0
+    drawString(x + 5, y + 30, String(WxConditions[0].Snowfall, 2) + (Units == "M" ? "mm" : "in") + " * *", LEFT); // Only display snowfall total today if > 0
 }
 //#########################################################################################
 void DrawAstronomySection(int x, int y) {
   u8g2Fonts.setFont(FONT(u8g2_font_helvB08));
   display.drawRect(x, y + 64, 167, 48, GxEPD_BLACK);
-  drawString(x + 7, y + 70, ConvertUnixTime(WxConditions[0].Sunrise).substring(0, (Units == "M" ? 5 : 7)) + " " + TXT_SUNRISE, LEFT);
-  drawString(x + 7, y + 85, ConvertUnixTime(WxConditions[0].Sunset).substring(0, (Units == "M" ? 5 : 7)) + " " + TXT_SUNSET, LEFT);
+  drawString(x + 7, y + 67, ConvertUnixTime(WxConditions[0].Sunrise).substring(0, (Units == "M" ? 5 : 7)) + " " + TXT_SUNRISE, LEFT);
+  drawString(x + 7, y + 82, ConvertUnixTime(WxConditions[0].Sunset).substring(0, (Units == "M" ? 5 : 7)) + " " + TXT_SUNSET, LEFT);
   time_t now = time(NULL);
   struct tm * now_utc = gmtime(&now);
   const int day_utc   = now_utc->tm_mday;
   const int month_utc = now_utc->tm_mon + 1;
   const int year_utc  = now_utc->tm_year + 1900;
-  drawString(x + 7, y + 100, MoonPhase(day_utc, month_utc, year_utc), LEFT);
+  drawString(x + 7, y + 97, MoonPhase(day_utc, month_utc, year_utc), LEFT);
   DrawMoon(x + 105, y + 50, day_utc, month_utc, year_utc, Hemisphere);
 }
 //#########################################################################################
@@ -494,7 +494,7 @@ boolean UpdateLocalTime() {
     {
       sprintf(day_output, "%s  %02u-%s-%04u", weekday_D[timeinfo.tm_wday], timeinfo.tm_mday, month_M[timeinfo.tm_mon], (timeinfo.tm_year) + 1900);
     }
-    strftime(update_time, sizeof(update_time), "%H:%M:%S", &timeinfo);  // Creates: '@ 14:05:49'   and change from 30 to 8 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    strftime(update_time, sizeof(update_time), "%H:%M", &timeinfo);  // Creates: '@ 14:05:49'   and change from 30 to 8 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     sprintf(time_output, "%s", update_time);
   }
   else
@@ -744,7 +744,7 @@ void CloudCover(int x, int y, int CCover) {
   addcloud(x + 3, y - 3, Small * 0.5, 2); // Cloud top right
   addcloud(x, y,         Small * 0.5, 2); // Main cloud
   u8g2Fonts.setFont(FONT(u8g2_font_helvB08));
-  drawString(x + 15, y - 5, String(CCover) + "%", LEFT);
+  drawString(x + 15, y - 9, String(CCover) + "%", LEFT);
 }
 //#########################################################################################
 void Visibility(int x, int y, String Visi) {
@@ -762,7 +762,7 @@ void Visibility(int x, int y, String Visi) {
   }
   display.fillCircle(x, y, r / 4, GxEPD_BLACK);
   u8g2Fonts.setFont(FONT(u8g2_font_helvB08));
-  drawString(x + 12, y - 3, Visi, LEFT);
+  drawString(x + 12, y - 6, Visi, LEFT);
 }
 //#########################################################################################
 void addmoon(int x, int y, int scale, bool IconSize) {
@@ -784,6 +784,21 @@ void Nodata(int x, int y, bool IconSize, String IconName) {
   u8g2Fonts.setFont(FONT(u8g2_font_helvB08));
 }
 //#########################################################################################
+void DrawRSSI(int x, int y, int rssi) {
+  int WIFIsignal = 0;
+  int xpos = 1;
+  for (int _rssi = -100; _rssi <= rssi; _rssi = _rssi + 20) {
+    if (_rssi <= -20)  WIFIsignal = 10; //            <-20dbm displays 5-bars
+    if (_rssi <= -40)  WIFIsignal = 8;  //  -40dbm to  -21dbm displays 4-bars
+    if (_rssi <= -60)  WIFIsignal = 6;  //  -60dbm to  -41dbm displays 3-bars
+    if (_rssi <= -80)  WIFIsignal = 4;  //  -80dbm to  -61dbm displays 2-bars
+    if (_rssi <= -100) WIFIsignal = 2;  // -100dbm to  -81dbm displays 1-bar
+    display.fillRect(x + xpos * 5, y - WIFIsignal - 1, 4, WIFIsignal, GxEPD_BLACK);
+    xpos++;
+  }
+  display.fillRect(x, y - 2, 4, 1, GxEPD_BLACK);
+}
+//#########################################################################################
 void DrawBattery(int x, int y) {
   uint8_t percentage = 100;
   float voltage = analogRead(35) / 4096.0 * 7.46;
@@ -792,10 +807,10 @@ void DrawBattery(int x, int y) {
     percentage = 2836.9625 * pow(voltage, 4) - 43987.4889 * pow(voltage, 3) + 255233.8134 * pow(voltage, 2) - 656689.7123 * voltage + 632041.7303;
     if (voltage >= 4.20) percentage = 100;
     if (voltage <= 3.50) percentage = 0;
-    display.drawRect(x + 15, y - 12, 19, 10, GxEPD_BLACK);
-    display.fillRect(x + 34, y - 10, 2, 5, GxEPD_BLACK);
-    display.fillRect(x + 17, y - 10, 15 * percentage / 100.0, 6, GxEPD_BLACK);
-    drawString(x + 65, y - 11, String(percentage) + "%", RIGHT);
+    display.drawRect(x + 15, y - 11, 19, 10, GxEPD_BLACK);
+    display.fillRect(x + 34, y - 8, 2, 5, GxEPD_BLACK);
+    display.fillRect(x + 17, y - 9, 15 * percentage / 100.0, 6, GxEPD_BLACK);
+    drawString(x + 65, y - 12, String(percentage) + "%", RIGHT);
     //drawString(x + 13, y + 5,  String(voltage, 2) + "v", CENTER);
   }
 }
@@ -837,7 +852,7 @@ void DrawGraph(int x_pos, int y_pos, int gwidth, int gheight, float Y1Min, float
   last_y = y_pos + (Y1Max - constrain(DataArray[1], Y1Min, Y1Max)) / (Y1Max - Y1Min) * gheight;
   display.drawRect(x_pos, y_pos, gwidth + 3, gheight + 2, GxEPD_BLACK);
   u8g2Fonts.setFont(FONT(u8g2_font_helvB08));
-  drawString(x_pos + gwidth / 2, y_pos - 12, title, CENTER);
+  drawString(x_pos + gwidth / 2, y_pos - 13, title, CENTER);
   // Draw the data
   for (int gx = 1; gx < readings; gx++) {
     x1 = last_x;
@@ -859,7 +874,7 @@ void DrawGraph(int x_pos, int y_pos, int gwidth, int gheight, float Y1Min, float
       if (spacing < y_minor_axis) display.drawFastHLine((x_pos + 3 + j * gwidth / number_of_dashes), y_pos + (gheight * spacing / y_minor_axis), gwidth / (2 * number_of_dashes), GxEPD_BLACK);
     }
     if ((Y1Max - (float)(Y1Max - Y1Min) / y_minor_axis * spacing) < 5 || title == TXT_PRESSURE_IN) {
-      drawString(x_pos, y_pos + gheight * spacing / y_minor_axis - 5, String((Y1Max - (float)(Y1Max - Y1Min) / y_minor_axis * spacing + 0.01), 1), RIGHT);
+      drawString(x_pos - 3, y_pos + gheight * spacing / y_minor_axis - 5, String((Y1Max - (float)(Y1Max - Y1Min) / y_minor_axis * spacing + 0.01), 1), RIGHT);
     }
     else
     {
@@ -870,16 +885,15 @@ void DrawGraph(int x_pos, int y_pos, int gwidth, int gheight, float Y1Min, float
     }
   }
   for (int i = 0; i <= 2; i++) {
-    drawString(15 + x_pos + gwidth / 3 * i, y_pos + gheight + 3, String(i), LEFT);
+    drawString(15 + x_pos + gwidth / 3 * i, y_pos + gheight + 1, String(i), LEFT);
   }
-  drawString(x_pos + gwidth / 2, y_pos + gheight + 10, TXT_DAYS, CENTER);
+  drawString(x_pos + gwidth / 2, y_pos + gheight + 8, TXT_DAYS, CENTER);
 }
 //#########################################################################################
 void drawString(int x, int y, String text, alignment align) {
-  int16_t  x1, y1; //the bounds of x,y and w and h of the variable 'text' in pixels.
   uint16_t w, h;
-  display.setTextWrap(false);
-  display.getTextBounds(text, x, y, &x1, &y1, &w, &h);
+  h = u8g2Fonts.getFontAscent() - u8g2Fonts.getFontDescent();
+  w = u8g2Fonts.getUTF8Width(text.c_str());
   if (align == RIGHT)  x = x - w;
   if (align == CENTER) x = x - w / 2;
   u8g2Fonts.setCursor(x, y + h);
@@ -887,9 +901,9 @@ void drawString(int x, int y, String text, alignment align) {
 }
 //#########################################################################################
 void drawStringMaxWidth(int x, int y, unsigned int text_width, String text, alignment align) {
-  int16_t  x1, y1; //the bounds of x,y and w and h of the variable 'text' in pixels.
   uint16_t w, h;
-  display.getTextBounds(text, x, y, &x1, &y1, &w, &h);
+  h = u8g2Fonts.getFontAscent() - u8g2Fonts.getFontDescent();
+  w = u8g2Fonts.getUTF8Width(text.c_str());
   if (align == RIGHT)  x = x - w;
   if (align == CENTER) x = x - w / 2;
   u8g2Fonts.setCursor(x, y);
